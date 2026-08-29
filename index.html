@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Workflow OS — a premium local-first workspace for getting work done." />
+  <title>Workflow OS — Dashboard</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "Poppins", "ui-sans-serif", "system-ui", "sans-serif"]
+          },
+          boxShadow: {
+            glow: "0 0 40px rgba(99,102,241,.18)",
+            purple: "0 0 28px rgba(168,85,247,.18)"
+          },
+          animation: {
+            float: "float 5s ease-in-out infinite",
+            pulseSoft: "pulseSoft 2.5s ease-in-out infinite"
+          },
+          keyframes: {
+            float: {
+              "0%, 100%": { transform: "translateY(0)" },
+              "50%": { transform: "translateY(-7px)" }
+            },
+            pulseSoft: {
+              "0%, 100%": { opacity: ".65" },
+              "50%": { opacity: "1" }
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: Inter, sans-serif; }
+    .glass {
+      background: rgba(15, 23, 42, .68);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .glass-light {
+      background: rgba(255, 255, 255, .78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(99,102,241,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,102,241,.045) 1px, transparent 1px);
+      background-size: 42px 42px;
+    }
+    .hero-glow::before {
+      content: "";
+      position: absolute;
+      width: 620px;
+      height: 330px;
+      left: 50%;
+      top: 15px;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(59,130,246,.16), rgba(168,85,247,.11), transparent 68%);
+      filter: blur(16px);
+      pointer-events: none;
+    }
+    .sidebar-item.active {
+      color: #fff;
+      background: linear-gradient(90deg, rgba(124,58,237,.95), rgba(59,130,246,.9));
+      box-shadow: 0 8px 24px rgba(79,70,229,.24);
+    }
+    .sidebar-item:not(.active):hover {
+      background: rgba(30,41,59,.65);
+      color: #fff;
+    }
+    .workflow-card {
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .workflow-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(99,102,241,.55);
+      box-shadow: 0 16px 34px rgba(0,0,0,.18);
+    }
+    .tool-button { transition: transform .18s ease, background .18s ease; }
+    .tool-button:hover { transform: translateY(-2px); background: rgba(30,41,59,.9); }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+    .mobile-overlay { display: none; }
+    @media (max-width: 1023px) {
+      .sidebar-open .mobile-overlay { display: block; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-[#070b14] text-slate-200 selection:bg-violet-500/30">
+  <div id="app" class="min-h-screen">
+
+    <!-- Mobile overlay -->
+    <div id="mobileOverlay" class="mobile-overlay fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"></div>
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside id="sidebar"
+      class="fixed inset-y-0 left-0 z-50 flex w-[272px] -translate-x-full flex-col border-r border-slate-800/80 bg-[#050810]/95 px-4 py-4 transition-transform duration-300 lg:translate-x-0">
+
+      <!-- Brand -->
+      <div class="flex items-center justify-between px-2 pb-5">
+        <div class="flex items-center gap-3">
+          <div class="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-400 shadow-lg shadow-violet-500/20">
+            <div class="absolute inset-[2px] rounded-[10px] bg-[#080c16]"></div>
+            <div class="relative text-lg font-black italic text-white">W</div>
+          </div>
+          <div>
+            <div class="text-[17px] font-extrabold tracking-tight text-white">WORKFLOW OS</div>
+            <div class="text-[9px] font-semibold tracking-[.24em] text-slate-500">INDIA</div>
+          </div>
+        </div>
+        <button id="closeSidebar" class="rounded-lg p-2 text-slate-500 hover:bg-slate-800 hover:text-white lg:hidden" aria-label="Close menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="scrollbar-thin flex-1 overflow-y-auto pr-1" aria-label="Primary navigation">
+
+        <a href="#home" class="sidebar-item active mb-2 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white" data-section="home">
+          <i class="fa-solid fa-house w-4 text-center"></i><span>Home</span>
+        </a>
+
+        <div class="mt-5 px-2 text-[10px] font-semibold uppercase tracking-[.12em] text-slate-500">Workspace</div>
+        <div class="mt-2 space-y-1">
+          <a href="#workbench" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="workbench">
+            <i class="fa-solid fa-table-cells-large w-4 text-center"></i><span>Workbench</span>
+          </a>
+          <a href="#workflows" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="workflows">
+            <i class="fa-solid fa-folder-tree w-4 text-center"></i><span>My Workflows</span>
+          </a>
+          <a href="#recent" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="recent">
+            <i class="fa-regular fa-clock w-4 text-center"></i><span>Recent Work</span>
+          </a>
+          <a href="#templates" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="templates">
+            <i class="fa-regular fa-bookmark w-4 text-center"></i><span>Saved Templates</span>
+          </a>
+        </div>
+
+        <div class="mt-5 px-2 text-[10px] font-semibold uppercase tracking-[.12em] text-slate-500">Categories</div>
+        <div class="mt-2 space-y-1">
+          <a href="#business" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="business">
+            <span class="flex h-5 w-5 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-400"><i class="fa-solid fa-briefcase text-[10px]"></i></span><span>Business</span>
+          </a>
+          <a href="#student" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="student">
+            <span class="flex h-5 w-5 items-center justify-center rounded-md bg-violet-500/15 text-violet-400"><i class="fa-solid fa-graduation-cap text-[10px]"></i></span><span>Student</span>
+          </a>
+          <a href="#creator" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="creator">
+            <span class="flex h-5 w-5 items-center justify-center rounded-md bg-red-500/15 text-red-400"><i class="fa-solid fa-video text-[10px]"></i></span><span>Creator</span>
+          </a>
+          <a href="#jobseeker" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="jobseeker">
+            <span class="flex h-5 w-5 items-center justify-center rounded-md bg-sky-500/15 text-sky-400"><i class="fa-solid fa-user-tie text-[10px]"></i></span><span>Job Seeker</span>
+          </a>
+          <a href="#seo" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="seo">
+            <span class="flex h-5 w-5 items-center justify-center rounded-md bg-cyan-500/15 text-cyan-400"><i class="fa-solid fa-globe text-[10px]"></i></span><span>Web / SEO</span>
+          </a>
+        </div>
+
+        <div class="mt-5 px-2 text-[10px] font-semibold uppercase tracking-[.12em] text-slate-500">Document Lab</div>
+        <div class="mt-2 space-y-1">
+          <a href="#documents" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="documents">
+            <i class="fa-regular fa-file-lines w-4 text-center"></i><span>My Documents</span>
+          </a>
+          <a href="#extract" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="extract">
+            <i class="fa-solid fa-file-export w-4 text-center"></i><span>Extract Data</span>
+          </a>
+          <a href="#compare" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="compare">
+            <i class="fa-solid fa-code-compare w-4 text-center"></i><span>Compare Files</span>
+          </a>
+        </div>
+
+        <div class="mt-5 px-2 text-[10px] font-semibold uppercase tracking-[.12em] text-slate-500">Export Center</div>
+        <div class="mt-2 space-y-1">
+          <a href="#exports" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="exports">
+            <i class="fa-solid fa-clock-rotate-left w-4 text-center"></i><span>Export History</span>
+          </a>
+          <a href="#scheduled" class="sidebar-item flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-400" data-section="scheduled">
+            <i class="fa-regular fa-circle-check w-4 text-center"></i><span>Scheduled Exports</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- Storage -->
+      <div class="mt-4 rounded-xl border border-slate-800 bg-slate-900/70 p-3.5">
+        <div class="mb-2 flex items-center justify-between text-xs">
+          <span class="font-medium text-slate-300">Storage (Local)</span>
+          <span class="text-slate-500">26%</span>
+        </div>
+        <div class="h-2 overflow-hidden rounded-full bg-slate-800">
+          <div class="h-full w-[26%] rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400"></div>
+        </div>
+        <div class="mt-2 text-[11px] text-slate-500">1.32 GB / 5 GB Used</div>
+      </div>
+
+      <button id="howWorksBtn" class="mt-4 flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/70 px-3.5 py-3 text-left transition hover:border-indigo-500/40 hover:bg-slate-800/80">
+        <span class="flex h-8 w-8 items-center justify-center rounded-full border border-indigo-400/30 bg-indigo-500/10 text-indigo-300">
+          <i class="fa-solid fa-play text-xs"></i>
+        </span>
+        <span>
+          <span class="block text-xs font-medium text-slate-300">How it Works?</span>
+          <span class="block text-[10px] text-slate-500">Quick product tour</span>
+        </span>
+      </button>
+    </aside>
+
+    <!-- ===================== MAIN ===================== -->
+    <main class="min-h-screen lg:pl-[272px]">
+      <div class="relative min-h-screen overflow-hidden grid-bg">
+
+        <!-- Ambient glow -->
+        <div class="pointer-events-none absolute -left-40 top-20 h-80 w-80 rounded-full bg-indigo-600/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute right-0 top-0 h-96 w-96 rounded-full bg-fuchsia-600/10 blur-3xl"></div>
+
+        <!-- Header -->
+        <header class="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-slate-800/70 bg-[#070b14]/80 px-4 backdrop-blur-xl sm:px-6 xl:px-8">
+          <button id="openSidebar" class="rounded-lg border border-slate-800 bg-slate-900/70 p-2.5 text-slate-300 lg:hidden" aria-label="Open menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="hidden text-sm font-semibold text-slate-300 lg:block">Dashboard</div>
+
+          <div class="ml-auto flex items-center gap-2 sm:gap-3">
+            <button id="upgradeBtn" class="hidden items-center gap-2 rounded-lg border border-violet-400/30 bg-violet-500/10 px-3 py-2 text-xs font-semibold text-violet-200 transition hover:bg-violet-500/20 sm:flex">
+              <i class="fa-solid fa-crown text-amber-300"></i>
+              Upgrade to Pro
+            </button>
+
+            <!-- Local Mode -->
+            <button id="localModeBtn" class="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/70 px-2.5 py-2 text-xs text-slate-300 transition hover:border-slate-700" aria-pressed="true">
+              <i class="fa-solid fa-lock text-slate-400"></i>
+              <span class="hidden sm:inline">Local Mode</span>
+              <span id="localModeTrack" class="relative h-5 w-10 rounded-full bg-emerald-500/20 ring-1 ring-emerald-400/20">
+                <span id="localModeKnob" class="absolute right-0.5 top-0.5 h-4 w-4 rounded-full bg-emerald-400 shadow-lg transition-all"></span>
+              </span>
+              <span id="localModeLabel" class="hidden font-semibold text-emerald-300 sm:inline">ON</span>
+            </button>
+
+            <button id="themeBtn" class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900/70 text-slate-300 hover:bg-slate-800" aria-label="Toggle theme">
+              <i id="themeIcon" class="fa-regular fa-moon"></i>
+            </button>
+
+            <div class="hidden h-6 w-px bg-slate-800 sm:block"></div>
+
+            <button id="notificationBtn" class="relative flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-slate-900/70 text-slate-300 hover:bg-slate-800" aria-label="Notifications">
+              <i class="fa-regular fa-bell"></i>
+              <span class="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-red-500"></span>
+            </button>
+
+            <button id="profileBtn" class="flex items-center gap-2 rounded-lg px-1.5 py-1 transition hover:bg-slate-900">
+              <div class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 bg-gradient-to-br from-slate-500 to-slate-800 text-xs font-bold text-white">AV</div>
+              <div class="hidden text-left md:block">
+                <div class="text-xs font-semibold text-slate-200">Aman Verma</div>
+                <div class="text-[10px] text-slate-500">Free Plan</div>
+              </div>
+              <i class="fa-solid fa-chevron-down hidden text-[10px] text-slate-500 md:block"></i>
+            </button>
+          </div>
+        </header>
+
+        <div class="mx-auto max-w-[1420px] px-4 py-6 sm:px-6 xl:px-8">
+
+          <!-- ===================== HERO ===================== -->
+          <section id="home" class="hero-glow relative py-5 text-center">
+            <div class="relative z-10">
+              <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-400/15 bg-indigo-500/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[.18em] text-indigo-300">
+                <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
+                Local-first workspace
+              </div>
+
+              <h1 class="mx-auto max-w-4xl text-3xl font-extrabold tracking-tight text-transparent sm:text-4xl lg:text-5xl xl:text-[52px] bg-gradient-to-r from-slate-100 via-indigo-300 to-fuchsia-400 bg-clip-text">
+                Get Any Work Done in One Place
+              </h1>
+              <p class="mx-auto mt-3 max-w-2xl text-sm text-slate-400 sm:text-base">
+                Upload anything, describe your task, and let Workflow OS handle the rest.
+              </p>
+
+              <!-- Tabs -->
+              <div class="mx-auto mt-7 flex max-w-3xl flex-wrap justify-center gap-1 rounded-xl border border-slate-800/80 bg-slate-950/65 p-1">
+                <button class="hero-tab flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-xs font-semibold text-white shadow-lg shadow-indigo-600/10 sm:text-sm" data-tab="describe">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> Describe Task
+                </button>
+                <button class="hero-tab flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-medium text-slate-400 transition hover:bg-slate-800/60 hover:text-white sm:text-sm" data-tab="upload">
+                  <i class="fa-regular fa-file-arrow-up"></i> Upload File
+                </button>
+                <button class="hero-tab flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-medium text-slate-400 transition hover:bg-slate-800/60 hover:text-white sm:text-sm" data-tab="paste">
+                  <i class="fa-solid fa-link"></i> Paste Data / URL
+                </button>
+              </div>
+
+              <!-- Dynamic input -->
+              <div class="mx-auto mt-2 max-w-4xl rounded-2xl border border-indigo-400/35 bg-slate-900/65 p-3 shadow-glow backdrop-blur-xl">
+                <div id="tabDescribe" class="tab-panel">
+                  <div class="relative">
+                    <textarea id="taskInput" rows="4" class="w-full resize-none rounded-xl border border-slate-800 bg-slate-950/60 p-4 pb-16 text-sm text-slate-200 outline-none placeholder:text-slate-600 focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-500/10" placeholder="Example: Mere purchase bill ka complete record bana do"></textarea>
+                    <button id="runTaskBtn" class="absolute bottom-3 right-3 flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:scale-[1.02] hover:from-indigo-400 hover:to-purple-500">
+                      Let's Get it Done <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div id="tabUpload" class="tab-panel hidden">
+                  <label for="heroFileInput" class="flex min-h-[170px] cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-700 bg-slate-950/40 px-4 transition hover:border-indigo-400/50 hover:bg-indigo-500/5">
+                    <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-xl text-indigo-300">
+                      <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div class="text-sm font-semibold text-slate-200">Choose a file</div>
+                    <div id="heroFileName" class="mt-1 text-xs text-slate-500">PDF, JPG, PNG, CSV, Excel, TXT</div>
+                    <input id="heroFileInput" type="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png,.csv,.xlsx,.xls,.txt" />
+                  </label>
+                </div>
+
+                <div id="tabPaste" class="tab-panel hidden">
+                  <div class="relative">
+                    <textarea id="pasteInput" rows="4" class="w-full resize-none rounded-xl border border-slate-800 bg-slate-950/60 p-4 pb-16 text-sm text-slate-200 outline-none placeholder:text-slate-600 focus:border-indigo-400/60" placeholder="Paste a URL, table data, JSON, CSV or any text here..."></textarea>
+                    <button id="processPasteBtn" class="absolute bottom-3 right-3 flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/20">
+                      Process Data <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Examples -->
+              <div class="mx-auto mt-3 flex max-w-5xl flex-wrap items-center justify-center gap-2 text-left">
+                <span class="mr-1 text-[11px] font-medium text-slate-500">Try Examples:</span>
+                <button class="example-chip rounded-full border border-slate-800 bg-slate-900/70 px-3 py-1.5 text-[10px] text-slate-400 transition hover:border-indigo-400/30 hover:text-white">Purchase bill ka data nikal ke record banao</button>
+                <button class="example-chip rounded-full border border-slate-800 bg-slate-900/70 px-3 py-1.5 text-[10px] text-slate-400 transition hover:border-indigo-400/30 hover:text-white">GST invoice banao</button>
+                <button class="example-chip rounded-full border border-slate-800 bg-slate-900/70 px-3 py-1.5 text-[10px] text-slate-400 transition hover:border-indigo-400/30 hover:text-white">Resume ko improve karo</button>
+                <button class="example-chip hidden rounded-full border border-slate-800 bg-slate-900/70 px-3 py-1.5 text-[10px] text-slate-400 transition hover:border-indigo-400/30 hover:text-white md:inline-flex">Video ke liye script ideas do</button>
+                <button id="refreshExamples" class="flex h-7 w-7 items-center justify-center rounded-full border border-slate-800 bg-slate-900/70 text-slate-400 hover:text-white" aria-label="Refresh examples">
+                  <i class="fa-solid fa-rotate text-[10px]"></i>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ===================== CONTENT GRID ===================== -->
+          <div class="mt-7 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_310px]">
+
+            <!-- Main column -->
+            <div class="min-w-0 space-y-4">
+
+              <!-- Popular Workflows -->
+              <section id="workflows" class="rounded-xl border border-slate-800/80 bg-slate-900/50 p-3.5 sm:p-4">
+                <div class="mb-3 flex items-center justify-between">
+                  <div>
+                    <h2 class="text-sm font-semibold text-slate-100">Popular Workflows</h2>
+                    <p class="mt-0.5 text-[10px] text-slate-500">Start from a proven workflow</p>
+                  </div>
+                  <button class="text-[11px] font-medium text-indigo-300 hover:text-indigo-200">Browse All <i class="fa-solid fa-arrow-right ml-1 text-[9px]"></i></button>
+                </div>
+
+                <div class="scrollbar-thin grid gap-2.5 overflow-x-auto pb-1 sm:grid-cols-2 2xl:grid-cols-4">
+                  <button class="workflow-card min-w-[220px] rounded-xl border border-slate-800 bg-gradient-to-br from-emerald-500/10 to-slate-900 p-3.5 text-left">
+                    <div class="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-300"><i class="fa-regular fa-file-lines"></i></div>
+                    <div class="text-xs font-bold text-slate-100">Purchase to Record</div>
+                    <p class="mt-1.5 line-clamp-2 text-[10px] leading-4 text-slate-500">Bill se data nikalo, GST check karo, purchase record aur stock entry banao.</p>
+                    <div class="mt-3 flex items-center gap-2 text-[9px] text-slate-500"><span class="rounded bg-slate-800 px-2 py-1">8 Steps</span><span>+12K uses</span></div>
+                  </button>
+
+                  <button class="workflow-card min-w-[220px] rounded-xl border border-slate-800 bg-gradient-to-br from-purple-500/10 to-slate-900 p-3.5 text-left">
+                    <div class="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-purple-500/20 text-purple-300"><i class="fa-regular fa-file-pdf"></i></div>
+                    <div class="text-xs font-bold text-slate-100">Invoice Generator</div>
+                    <p class="mt-1.5 line-clamp-2 text-[10px] leading-4 text-slate-500">Professional GST invoice banao aur PDF export karo.</p>
+                    <div class="mt-3 flex items-center gap-2 text-[9px] text-slate-500"><span class="rounded bg-slate-800 px-2 py-1">6 Steps</span><span>+9K uses</span></div>
+                  </button>
+
+                  <button class="workflow-card min-w-[220px] rounded-xl border border-slate-800 bg-gradient-to-br from-blue-500/10 to-slate-900 p-3.5 text-left">
+                    <div class="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/20 text-blue-300"><i class="fa-solid fa-file-lines"></i></div>
+                    <div class="text-xs font-bold text-slate-100">Resume Booster</div>
+                    <p class="mt-1.5 line-clamp-2 text-[10px] leading-4 text-slate-500">Resume improve karo, ATS check karo aur cover letter banao.</p>
+                    <div class="mt-3 flex items-center gap-2 text-[9px] text-slate-500"><span class="rounded bg-slate-800 px-2 py-1">7 Steps</span><span>+7K uses</span></div>
+                  </button>
+
+                  <button class="workflow-card min-w-[220px] rounded-xl border border-slate-800 bg-gradient-to-br from-orange-500/10 to-slate-900 p-3.5 text-left">
+                    <div class="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/20 text-orange-300"><i class="fa-solid fa-briefcase"></i></div>
+                    <div class="text-xs font-bold text-slate-100">Video SEO Toolkit</div>
+                    <p class="mt-1.5 line-clamp-2 text-[10px] leading-4 text-slate-500">Title, description, tags, chapters aur thumbnail ideas ek saath.</p>
+                    <div class="mt-3 flex items-center gap-2 text-[9px] text-slate-500"><span class="rounded bg-slate-800 px-2 py-1">9 Steps</span><span>+15K uses</span></div>
+                  </button>
+                </div>
+              </section>
+
+              <!-- Recent Work -->
+              <section id="recent" class="overflow-hidden rounded-xl border border-slate-800/80 bg-slate-900/50">
+                <div class="flex items-center justify-between border-b border-slate-800/80 px-4 py-3.5">
+                  <div>
+                    <h2 class="text-sm font-semibold text-slate-100">Recent Work</h2>
+                    <p class="mt-0.5 text-[10px] text-slate-500">Your latest completed workflows</p>
+                  </div>
+                  <button id="viewAllBtn" class="text-[11px] font-medium text-indigo-300 hover:text-indigo-200">View All</button>
+                </div>
+
+                <div class="scrollbar-thin overflow-x-auto">
+                  <table class="w-full min-w-[720px] text-left">
+                    <thead class="border-b border-slate-800/70 bg-slate-950/20 text-[9px] uppercase tracking-wider text-slate-500">
+                      <tr>
+                        <th class="px-4 py-3 font-medium">Work Name</th>
+                        <th class="px-4 py-3 font-medium">Type</th>
+                        <th class="px-4 py-3 font-medium">Date</th>
+                        <th class="px-4 py-3 font-medium">Status</th>
+                        <th class="px-4 py-3 text-right font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recentTableBody" class="divide-y divide-slate-800/60">
+                      <tr class="group hover:bg-slate-800/25">
+                        <td class="px-4 py-3">
+                          <div class="flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i class="fa-solid fa-file-pdf"></i></span>
+                            <div><div class="text-xs font-medium text-slate-200">Purchase_Bill_May_2024.pdf</div><div class="text-[9px] text-slate-500">2.4 MB</div></div>
+                          </div>
+                        </td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">Purchase Record</td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">21 May 2024, 10:30 AM</td>
+                        <td class="px-4 py-3"><span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[9px] font-semibold text-emerald-300">Completed</span></td>
+                        <td class="px-4 py-3">
+                          <div class="flex justify-end gap-1.5">
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="View"><i class="fa-regular fa-eye text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="Download"><i class="fa-solid fa-download text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="More"><i class="fa-solid fa-ellipsis-vertical text-[10px]"></i></button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr class="group hover:bg-slate-800/25">
+                        <td class="px-4 py-3">
+                          <div class="flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 text-red-400"><i class="fa-solid fa-file-pdf"></i></span>
+                            <div><div class="text-xs font-medium text-slate-200">Invoice_INV-001.pdf</div><div class="text-[9px] text-slate-500">820 KB</div></div>
+                          </div>
+                        </td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">Invoice</td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">21 May 2024, 09:15 AM</td>
+                        <td class="px-4 py-3"><span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[9px] font-semibold text-emerald-300">Completed</span></td>
+                        <td class="px-4 py-3">
+                          <div class="flex justify-end gap-1.5">
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="View"><i class="fa-regular fa-eye text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="Download"><i class="fa-solid fa-download text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="More"><i class="fa-solid fa-ellipsis-vertical text-[10px]"></i></button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr class="group hover:bg-slate-800/25">
+                        <td class="px-4 py-3">
+                          <div class="flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400"><i class="fa-solid fa-file-word"></i></span>
+                            <div><div class="text-xs font-medium text-slate-200">Resume_Aman_Verma.docx</div><div class="text-[9px] text-slate-500">1.1 MB</div></div>
+                          </div>
+                        </td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">Resume Booster</td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">20 May 2024, 11:45 AM</td>
+                        <td class="px-4 py-3"><span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[9px] font-semibold text-emerald-300">Completed</span></td>
+                        <td class="px-4 py-3">
+                          <div class="flex justify-end gap-1.5">
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="View"><i class="fa-regular fa-eye text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="Download"><i class="fa-solid fa-download text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="More"><i class="fa-solid fa-ellipsis-vertical text-[10px]"></i></button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr class="group hover:bg-slate-800/25">
+                        <td class="px-4 py-3">
+                          <div class="flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400"><i class="fa-solid fa-file-lines"></i></span>
+                            <div><div class="text-xs font-medium text-slate-200">Youtube_Video_Seo.docx</div><div class="text-[9px] text-slate-500">670 KB</div></div>
+                          </div>
+                        </td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">Video SEO Toolkit</td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">20 May 2024, 10:10 AM</td>
+                        <td class="px-4 py-3"><span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[9px] font-semibold text-emerald-300">Completed</span></td>
+                        <td class="px-4 py-3">
+                          <div class="flex justify-end gap-1.5">
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="View"><i class="fa-regular fa-eye text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="Download"><i class="fa-solid fa-download text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="More"><i class="fa-solid fa-ellipsis-vertical text-[10px]"></i></button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <tr class="group hover:bg-slate-800/25">
+                        <td class="px-4 py-3">
+                          <div class="flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400"><i class="fa-solid fa-globe"></i></span>
+                            <div><div class="text-xs font-medium text-slate-200">Website_Audit_mywebsite.com</div><div class="text-[9px] text-slate-500">Report</div></div>
+                          </div>
+                        </td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">SEO Audit</td>
+                        <td class="px-4 py-3 text-[10px] text-slate-400">19 May 2024, 06:20 PM</td>
+                        <td class="px-4 py-3"><span class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[9px] font-semibold text-emerald-300">Completed</span></td>
+                        <td class="px-4 py-3">
+                          <div class="flex justify-end gap-1.5">
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="View"><i class="fa-regular fa-eye text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="Download"><i class="fa-solid fa-download text-[10px]"></i></button>
+                            <button class="table-action h-7 w-7 rounded-lg border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white" title="More"><i class="fa-solid fa-ellipsis-vertical text-[10px]"></i></button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+
+            <!-- ===================== RIGHT RAIL ===================== -->
+            <aside class="space-y-4">
+
+              <!-- Drop Zone -->
+              <section id="workbench" class="rounded-xl border border-slate-800/80 bg-slate-900/60 p-3.5">
+                <div class="mb-2 text-sm font-semibold text-slate-100">Drop Anything Here</div>
+                <label id="dropZone" for="dropFileInput" class="group flex min-h-[138px] cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-slate-600 bg-slate-950/35 px-3 text-center transition hover:border-indigo-400/70 hover:bg-indigo-500/5">
+                  <div class="text-3xl text-slate-400 transition group-hover:-translate-y-1 group-hover:text-indigo-300"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                  <div class="mt-2 text-xs font-medium text-slate-300">Upload File / Image / PDF</div>
+                  <div class="mt-1 text-[10px] text-slate-500">or Drag & Drop</div>
+                  <div id="dropFileName" class="mt-2 max-w-full truncate text-[10px] text-indigo-300"></div>
+                  <input id="dropFileInput" type="file" class="hidden" multiple />
+                </label>
+                <div class="mt-2 text-center text-[9px] text-slate-500">Supports: PDF, JPG, PNG, CSV, Excel, TXT</div>
+
+                <div class="mt-4 border-t border-slate-800 pt-3">
+                  <div class="mb-2 flex items-center justify-between">
+                    <h3 class="text-xs font-semibold text-slate-200">Quick Tools</h3>
+                    <button id="allToolsBtn" class="text-[9px] font-medium text-indigo-300">View All</button>
+                  </div>
+                  <div class="grid grid-cols-4 gap-2">
+                    <button class="tool-button tool-btn rounded-lg border border-slate-800 bg-slate-950/50 p-2 text-center" data-tool="PDF to Excel"><i class="fa-solid fa-file-excel text-emerald-400"></i><span class="mt-1 block text-[8px] text-slate-500">PDF to Excel</span></button>
+                    <button class="tool-button tool-btn rounded-lg border border-slate-800 bg-slate-950/50 p-2 text-center" data-tool="Image to Text"><i class="fa-regular fa-image text-violet-400"></i><span class="mt-1 block text-[8px] text-slate-500">Image to Text</span></button>
+                    <button class="tool-button tool-btn rounded-lg border border-slate-800 bg-slate-950/50 p-2 text-center" data-tool="GST Check"><i class="fa-solid fa-receipt text-cyan-400"></i><span class="mt-1 block text-[8px] text-slate-500">GST Check</span></button>
+                    <button class="tool-button tool-btn rounded-lg border border-slate-800 bg-slate-950/50 p-2 text-center" data-tool="Invoice Maker"><i class="fa-regular fa-file-lines text-red-400"></i><span class="mt-1 block text-[8px] text-slate-500">Invoice Maker</span></button>
+                    <button class="tool-button tool-btn rounded-lg border border-slate-800 bg-slate-950/50 p-2 text-center" data-tool="Merge PDF"><i class="fa-solid fa-layer-group text-pink-400"></i><span class="mt-1 block text-[8px] text-slate-500">Merge PDF</span></button>
+                    <button class="tool-button tool-btn rounded-lg border border-slate-800 bg-slate-950/50 p-2 text-center" data-tool="Compress PDF"><i class="fa-solid fa-file-zipper text-amber-400"></i><span class="mt-1 block text-[8px] text-slate-500">Compress PDF</span></button>
+                    <button class="tool-button tool-btn rounded-lg border border-slate-800 bg-slate-950/50 p-2 text-center" data-tool="QR Code"><i class="fa-solid fa-qrcode text-orange-400"></i><span class="mt-1 block text-[8px] text-slate-500">QR Code</span></button>
+                    <button class="tool-button tool-btn rounded-lg border border-slate-800 bg-slate-950/50 p-2 text-center" data-tool="All Tools"><i class="fa-solid fa-grip text-slate-300"></i><span class="mt-1 block text-[8px] text-slate-500">All Tools</span></button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Privacy -->
+              <section id="documents" class="rounded-xl border border-slate-800/80 bg-slate-900/60 p-3.5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400"><i class="fa-solid fa-shield-halved text-xs"></i></span>
+                    <h3 class="text-sm font-semibold text-slate-100">Privacy First</h3>
+                  </div>
+                  <button id="privacyToggle" class="relative h-5 w-10 rounded-full bg-emerald-500/20 ring-1 ring-emerald-400/20" aria-pressed="true">
+                    <span id="privacyKnob" class="absolute right-0.5 top-0.5 h-4 w-4 rounded-full bg-emerald-400"></span>
+                  </button>
+                </div>
+                <div class="my-3 h-px bg-gradient-to-r from-emerald-500/50 to-transparent"></div>
+                <p class="text-[10px] leading-4 text-slate-500">Your files are processed locally in your browser. Nothing is uploaded to our servers.</p>
+                <button class="mt-2 text-[10px] font-medium text-cyan-300 hover:text-cyan-200">Learn more</button>
+              </section>
+
+              <!-- Productivity -->
+              <section id="templates" class="rounded-xl border border-slate-800/80 bg-slate-900/60 p-3.5">
+                <div class="mb-3 flex items-center justify-between">
+                  <div>
+                    <h3 class="text-sm font-semibold text-slate-100">Your Productivity</h3>
+                    <p class="mt-0.5 text-[9px] text-slate-500">This Month</p>
+                  </div>
+                  <button class="rounded-lg border border-slate-800 bg-slate-950/50 px-2.5 py-1.5 text-[9px] text-slate-400">This Month <i class="fa-solid fa-chevron-down ml-1"></i></button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="rounded-lg border border-slate-800 bg-slate-950/45 p-3">
+                    <div class="text-[9px] text-slate-500">Workflows Completed</div>
+                    <div class="mt-2 flex items-end justify-between"><span class="text-2xl font-bold text-white">32</span><i class="fa-solid fa-chart-simple text-xl text-emerald-400"></i></div>
+                  </div>
+                  <div class="rounded-lg border border-slate-800 bg-slate-950/45 p-3">
+                    <div class="text-[9px] text-slate-500">Time Saved (hours)</div>
+                    <div class="mt-2 flex items-end justify-between"><span class="text-2xl font-bold text-white">18.6</span><i class="fa-regular fa-clock text-xl text-blue-400"></i></div>
+                  </div>
+                  <div class="rounded-lg border border-slate-800 bg-slate-950/45 p-3">
+                    <div class="text-[9px] text-slate-500">Files Processed</div>
+                    <div class="mt-2 flex items-end justify-between"><span class="text-2xl font-bold text-white">56</span><i class="fa-solid fa-folder text-xl text-purple-400"></i></div>
+                  </div>
+                  <div class="rounded-lg border border-slate-800 bg-slate-950/45 p-3">
+                    <div class="text-[9px] text-slate-500">Tasks Automated</div>
+                    <div class="mt-2 flex items-end justify-between"><span class="text-2xl font-bold text-white">24</span><i class="fa-solid fa-bolt text-xl text-orange-400"></i></div>
+                  </div>
+                </div>
+
+                <button id="upgradeBottomBtn" class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 py-2.5 text-xs font-bold text-white shadow-lg shadow-indigo-600/10 transition hover:brightness-110">
+                  Upgrade to Pro <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </button>
+              </section>
+            </aside>
+          </div>
+
+          <!-- Footer -->
+          <footer class="mt-6 flex flex-col gap-2 border-t border-slate-800/70 py-5 text-[10px] text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+            <span>© 2026 Workflow OS. Built for focused work.</span>
+            <div class="flex gap-4">
+              <button>Privacy</button>
+              <button>Terms</button>
+              <button>Help</button>
+            </div>
+          </footer>
+        </div>
+      </div>
+    </main>
+
+
+    <div id="toolModal" class="fixed inset-0 z-[75] hidden items-center justify-center bg-black/75 p-4 backdrop-blur-md">
+      <div class="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-2xl border border-slate-700 bg-[#0a1020] shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 px-5 py-4"><div><div id="toolModalTitle" class="text-base font-bold text-white">Tool</div><div id="toolModalSubtitle" class="mt-0.5 text-[10px] text-slate-500"></div></div><button id="toolModalClose" class="rounded-lg p-2 text-slate-500 hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-xmark"></i></button></div>
+        <div id="toolModalBody" class="max-h-[calc(92vh-72px)] overflow-y-auto p-5"></div>
+      </div>
+    </div>
+    <!-- Toast -->
+    <div id="toast" class="pointer-events-none fixed bottom-5 left-1/2 z-[80] hidden -translate-x-1/2 rounded-xl border border-slate-700 bg-slate-900/95 px-4 py-3 text-xs font-medium text-slate-100 shadow-2xl shadow-black/40 backdrop-blur-xl"></div>
+
+    <!-- Simple modal -->
+    <div id="tourModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div class="w-full max-w-md rounded-2xl border border-slate-700 bg-[#0b1120] p-5 shadow-2xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-white">How Workflow OS Works</h3>
+          <button id="closeTour" class="rounded-lg p-2 text-slate-500 hover:bg-slate-800 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="mt-4 space-y-3">
+          <div class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-300">1</span><p class="text-xs leading-5 text-slate-400">Describe what you want done, upload a file, or paste your data.</p></div>
+          <div class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-500/15 text-purple-300">2</span><p class="text-xs leading-5 text-slate-400">Choose a workflow or let the workspace route the task.</p></div>
+          <div class="flex gap-3"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-300">3</span><p class="text-xs leading-5 text-slate-400">Process files locally and export the finished result.</p></div>
+        </div>
+        <button id="doneTour" class="mt-5 w-full rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 py-2.5 text-xs font-bold text-white">Got it</button>
+      </div>
+    </div>
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+  </div>
+</body>
+</html>
+
